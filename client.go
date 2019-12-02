@@ -137,6 +137,13 @@ func (d *DiscordClient) Open() error {
 // Listen to the websocket using the specified number of shards. -1 to use recommended number.
 func (d *DiscordClient) Listen(shardCount int) (<-chan Message, error) {
 	if shardCount < 1 {
+		if d.Session == nil {
+			err := d.Open()
+			if err != nil {
+				return nil, err
+			}
+		}
+
 		s, err := d.Session.GatewayBot()
 		if err != nil {
 			return nil, err
