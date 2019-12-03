@@ -30,6 +30,7 @@ type DiscordClient struct {
 	messageChan chan Message
 
 	Session     *discordgo.Session
+	User        *discordgo.User
 	Sessions    []*discordgo.Session
 	OwnerUserID string
 	ClientID    string
@@ -108,18 +109,34 @@ func (d *DiscordClient) onMessageDelete(s *discordgo.Session, message *discordgo
 
 // UserName gets the username of the client
 func (d *DiscordClient) UserName() string {
-	if d.Session.State.User == nil {
+	user := d.getCurrentUser()
+	if user == nil {
 		return ""
 	}
-	return d.Session.State.User.Username
+
+	return user.Username
 }
 
 // UserID the UserID of the client
 func (d *DiscordClient) UserID() string {
-	if d.Session.State.User == nil {
+	user := d.getCurrentUser()
+	if user == nil {
 		return ""
 	}
-	return d.Session.State.User.ID
+	return user.ID
+}
+
+func (d *DiscordClient) getCurrentUser() *discordgo.User {
+	if d.Session.State.User != nil {
+		return d.Session.State.User
+	}
+
+	if d.User != nil {
+		return d.User
+	}
+
+	d.User, _ = d.Session.User("@me")
+	return d.User
 }
 
 // Open a connection
@@ -207,10 +224,7 @@ func (d *DiscordClient) shardListenConfigureSession(s *discordgo.Session, shardC
 
 // IsMe checks if the message has the same id as this session
 func (d *DiscordClient) IsMe(message Message) bool {
-	if d.Session.State.User == nil {
-		return false
-	}
-	return message.UserID() == d.Session.State.User.ID
+	return message.UserID() == d.UserID()
 }
 
 // SendMessage sends a discord message
