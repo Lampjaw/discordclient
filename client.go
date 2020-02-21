@@ -34,6 +34,7 @@ type DiscordClient struct {
 	Sessions    []*discordgo.Session
 	OwnerUserID string
 	ClientID    string
+	AllowBots   bool
 }
 
 var channelIDRegex = regexp.MustCompile("<#[0-9]*>")
@@ -76,7 +77,7 @@ func (d *DiscordClient) replaceRoleNames(message *discordgo.Message, content str
 }
 
 func (d *DiscordClient) onMessageCreate(s *discordgo.Session, message *discordgo.MessageCreate) {
-	if message.Content == "" || (message.Author != nil && message.Author.Bot) {
+	if message.Content == "" || (message.Author != nil && (!d.AllowBots && message.Author.Bot)) {
 		return
 	}
 
@@ -88,7 +89,7 @@ func (d *DiscordClient) onMessageCreate(s *discordgo.Session, message *discordgo
 }
 
 func (d *DiscordClient) onMessageUpdate(s *discordgo.Session, message *discordgo.MessageUpdate) {
-	if message.Content == "" || (message.Author != nil && message.Author.Bot) {
+	if message.Content == "" || (message.Author != nil && (!d.AllowBots && message.Author.Bot)) {
 		return
 	}
 
