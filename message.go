@@ -22,6 +22,7 @@ type Message interface {
 	ResolveGuildID() (string, error)
 	ResolveMessageChannel() (*discordgo.Channel, error)
 	IsMentionTrigger(string) (bool, string)
+	IsBot() bool
 }
 
 // DiscordMessage holds received message information
@@ -155,4 +156,9 @@ func (m *DiscordMessage) IsMentionTrigger(trigger string) (bool, string) {
 	mentionTrigger := fmt.Sprintf("%s %s", parts[0], parts[1])
 
 	return parts[1] == trigger, mentionTrigger
+}
+
+// IsBot returns true if the message author is a bot. This will always be false if DiscordClient.AllowBots is false.
+func (m *DiscordMessage) IsBot() bool {
+	return m.DiscordgoMessage.Author != nil && m.DiscordgoMessage.Author.Bot
 }
