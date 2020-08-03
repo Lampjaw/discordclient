@@ -29,12 +29,13 @@ type DiscordClient struct {
 	args        []interface{}
 	messageChan chan Message
 
-	Session     *discordgo.Session
-	User        *discordgo.User
-	Sessions    []*discordgo.Session
-	OwnerUserID string
-	ClientID    string
-	AllowBots   bool
+	Session        *discordgo.Session
+	User           *discordgo.User
+	Sessions       []*discordgo.Session
+	OwnerUserID    string
+	ClientID       string
+	AllowBots      bool
+	GatewayIntents *discordgo.Intent
 }
 
 var channelIDRegex = regexp.MustCompile("<#[0-9]*>")
@@ -219,6 +220,7 @@ func (d *DiscordClient) shardListenConfigureSession(s *discordgo.Session, shardC
 	s.AddHandler(d.onMessageUpdate)
 	s.AddHandler(d.onMessageDelete)
 	s.State.TrackPresences = false
+	s.Identify.Intents = d.GatewayIntents
 
 	return s.Open()
 }
