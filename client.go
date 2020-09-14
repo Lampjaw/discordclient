@@ -29,12 +29,13 @@ type DiscordClient struct {
 	args        []interface{}
 	messageChan chan Message
 
-	Session     *discordgo.Session
-	User        *discordgo.User
-	Sessions    []*discordgo.Session
-	OwnerUserID string
-	ClientID    string
-	AllowBots   bool
+	Session        *discordgo.Session
+	User           *discordgo.User
+	Sessions       []*discordgo.Session
+	OwnerUserID    string
+	ClientID       string
+	AllowBots      bool
+	GatewayIntents discordgo.Intent
 }
 
 var channelIDRegex = regexp.MustCompile("<#[0-9]*>")
@@ -162,6 +163,7 @@ func (d *DiscordClient) Listen(shardCount int) (<-chan Message, error) {
 			}
 		}
 
+		d.attachGatewayIntents(d.Session)
 		s, err := d.Session.GatewayBot()
 		if err != nil {
 			return nil, err
@@ -219,8 +221,13 @@ func (d *DiscordClient) shardListenConfigureSession(s *discordgo.Session, shardC
 	s.AddHandler(d.onMessageUpdate)
 	s.AddHandler(d.onMessageDelete)
 	s.State.TrackPresences = false
+	d.attachGatewayIntents(s)
 
 	return s.Open()
+}
+
+func (d *DiscordClient) attachGatewayIntents(s *discordgo.Session) {
+	s.Identify.Intents = discordgo.MakeIntent(d.GatewayIntents)
 }
 
 // IsMe checks if the message has the same id as this session
