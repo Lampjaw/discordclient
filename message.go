@@ -106,6 +106,10 @@ func (m *DiscordMessage) Timestamp() (time.Time, error) {
 
 // ResolveGuildID resolves the GuildID from the message channel
 func (m *DiscordMessage) ResolveGuildID() (string, error) {
+	if m.DiscordgoMessage.GuildID != "" {
+		return m.DiscordgoMessage.GuildID, nil
+	}
+
 	channel, err := m.ResolveMessageChannel()
 
 	if err != nil {
