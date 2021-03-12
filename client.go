@@ -437,7 +437,7 @@ func (d *DiscordClient) Guilds() []*discordgo.Guild {
 }
 
 // UserChannelPermissions returns the permissions for a user in a channel
-func (d *DiscordClient) UserChannelPermissions(userID, channelID string) (apermissions int, err error) {
+func (d *DiscordClient) UserChannelPermissions(userID, channelID string) (apermissions int64, err error) {
 	for _, s := range d.Sessions {
 		apermissions, err = s.State.UserChannelPermissions(userID, channelID)
 		if err == nil {
